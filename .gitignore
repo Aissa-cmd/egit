@@ -1,3 +1,4 @@
+dist/
 test-repo/
 __pycache__/
 .venv/
