@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "egit"
-version = "0.1.0"
+version = "0.1.2"
 description = ""
 authors = ["Aissa Ouboukioud <aissa.1bacsm1@gmail.com>"]
 readme = "README.md"
@@ -9,10 +9,9 @@ readme = "README.md"
 egit="egit.main:main"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = ">=3.11"
 rich = "^13.9.4"
 gitpython = "^3.1.43"
-typer = "^0.13.0"
 
 
 [tool.poetry.group.dev.dependencies]
