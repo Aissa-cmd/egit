@@ -20,22 +20,23 @@ class ArgvOptions:
         git_args: {self.git_args}
         """
     
-def print_help():
-    help_text = f"""
-    egit - Enhanced Git CLI (v{__version__})
+# def print_help():
+#     help_text = f"""
+#     egit - Enhanced Git CLI (v{__version__})
     
-    Usage:
-        egit [options] -- [git commands/options]
+#     Usage:
+#         egit [options] -- [git commands/options]
     
-    Options:
-        -h, --help            Show help
-        -nf, --no-fetch       Don't check status of remote branch
-        -v, --verbose         Print status of remote branch
-        -i, --interactive     Interactive rebase
-        -no, --no-origin      When found multile remotes, ask which one to use
-        -c, --check           Run pre-hooks
-    """
-    print(help_text)
+#     Options:
+#         -h, --help            Show help
+#         -nf, --no-fetch       Don't check status of remote branch
+#         -v, --verbose         Print status of remote branch
+#         -i, --interactive     Interactive rebase
+#         -no, --no-origin      When found multile remotes, ask which one to use
+#         -c, --check           Run pre-hooks
+#         -V, --version         Show version
+#     """
+#     print(help_text)
 
 def parse_argv(args: list[str]) -> ArgvOptions:
     egit_args = []
@@ -50,8 +51,9 @@ def parse_argv(args: list[str]) -> ArgvOptions:
     parsed_egit_args = egit_parser.parse_args(egit_args)
     parsed_options = ArgvOptions(parsed_egit_args, git_args)
     # called with no args (egit and git) or with -h/--help, print help and exit
-    if (len(egit_args) == 0 or parsed_options.egit_args.help) and (len(git_args) == 0):
-        print_help()
+    if len(egit_args) == 0 and len(git_args) == 0:
+        # print_help()
+        egit_parser.print_usage()
         sys.exit(0)
     # called with -V/--version, print version and exit
     if parsed_options.egit_args.version:
@@ -74,6 +76,9 @@ def get_repo(path: str) -> Repo:
         ).decode("utf-8").strip()
         return Repo(base_path_to_repo)
     except exc.InvalidGitRepositoryError:
+        Console.error("Invalid git repository")
+        sys.exit(1)
+    except subprocess.CalledProcessError:
         Console.error("Invalid git repository")
         sys.exit(1)
 

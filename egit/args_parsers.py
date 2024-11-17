@@ -1,7 +1,6 @@
 import argparse
 
-egit_parser = argparse.ArgumentParser(description="Enhanced Git CLI", add_help=False)
-egit_parser.add_argument('-h', '--help', default=False, dest='help', action='store_true', help="Show help")
+egit_parser = argparse.ArgumentParser(description="Enhanced Git CLI")
 egit_parser.add_argument('-nf', '--no-fetch', default=False, dest='no_fetch', action='store_true', help="Don't check status of remote branch")
 egit_parser.add_argument('-v', '--verbose', default=False, dest='verbose', action='store_true', help="Print status of remote branch")
 egit_parser.add_argument('-i', '--interactive', default=False, dest='interactive', action='store_true', help="Interactive rebase")
