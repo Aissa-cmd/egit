@@ -1,6 +1,5 @@
 import sys
 import re
-from pathlib import Path
 from egit.repository import Repository
 from egit.utils import (
     file_path_relative_to_repo,
@@ -50,18 +49,14 @@ class GitHooks:
     def _check_no_comments(self) -> bool:
         found_comment = False
         for file in self.repo.staged_files:
-            diff = ""
-            if self.repo.is_first_commit:
-                diff = file.read_text()
-            else:
-                diff = self.repo.get_staged_file_diff(file)
+            diff = self.repo.get_staged_file_diff(file)
             # check for '!NO_TRACK' in diff
             if re.search(r'!NO_TRACK', diff, flags=re.IGNORECASE):
                 self.runner.rich_text([
                     ["⏮️ ", "white"],
                     ["!NO_TRACK", "bold yellow"],
                     [" found in ", "white"],
-                    [file_path_relative_to_repo(file, self.repo.repo), "cyan"],
+                    [file_path_relative_to_repo(file, self.repo.repo), "cyan underline"],
                 ])
                 found_comment = True
             # check for '!NO_COMMIT' in diff
@@ -70,14 +65,14 @@ class GitHooks:
                     ["⏮️ ", "white"],
                     ["!NO_COMMIT", "bold yellow"],
                     [" found in ", "white"],
-                    [file_path_relative_to_repo(file, self.repo.repo), "cyan"],
+                    [file_path_relative_to_repo(file, self.repo.repo), "cyan underline"],
                 ])
                 found_comment = True
         return found_comment
 
-    def _check_no_commit_comment(self, staged_files: list[Path]) -> bool:
+    def _check_no_commit_comment(self) -> bool:
         found_comment = False
-        for file in staged_files:
+        for file in self.repo.staged_files:
             # check for '!NO_COMMIT' in diff
             diff = self.repo.get_staged_file_diff(file)
             # use re better that str.contains case-insensitive
@@ -86,14 +81,14 @@ class GitHooks:
                     ["⏮️ ", "white"],
                     ["!NO_COMMIT", "bold yellow"],
                     [" found in ", "white"],
-                    [file_path_relative_to_repo(file, self.repo.repo), "cyan"],
+                    [file_path_relative_to_repo(file, self.repo.repo), "cyan underline"],
                 ])
                 found_comment = True
         return found_comment
 
-    def _check_no_track_comment(self, staged_files: list[Path]) -> bool:
+    def _check_no_track_comment(self) -> bool:
         found_comment = False
-        for file in staged_files:
+        for file in self.repo.staged_files:
             # check for '!NO_TRACK' in diff 
             diff = self.repo.get_staged_file_diff(file)
             # use re better that str.contains case-insensitive
@@ -102,9 +97,31 @@ class GitHooks:
                     ["⏮️ ", "white"],
                     ["!NO_TRACK", "bold yellow"],
                     [" found in ", "white"],
-                    [file_path_relative_to_repo(file, self.repo.repo), "cyan"],
+                    [file_path_relative_to_repo(file, self.repo.repo), "cyan underline"],
                 ])
                 found_comment = True
+        return found_comment
+
+    def _check_todo_comment(self) -> bool:
+        found_comment = False
+        for file in self.repo.staged_files:
+            # check for 'TODO' in diff
+            diff = self.repo.get_staged_file_diff(file)
+            if re.search(r'TODO', diff, flags=re.IGNORECASE):
+                self.runner.rich_text([
+                    ["⏮️ ", "white"],
+                    ["TODO", "bold #FF8C00"],
+                    [" found in ", "white"],
+                    [file_path_relative_to_repo(file, self.repo.repo), "cyan underline"],
+                ])
+                found_comment = True
+        if found_comment:
+            result = self.runner.ask("Found TODOs, do you want to continue?", default="y", choices=["y", "n"])
+            if result == "n":
+                self.runner.info("Aborting")
+                sys.exit(0)
+            else:
+                self.runner.info("Continuing")
         return found_comment
     
     # * pre_hooks
@@ -115,6 +132,7 @@ class GitHooks:
             self._pull_changes()
         # get staged file names
         found_coment = self._check_no_comments()
+        self._check_todo_comment()
         if found_coment:
             raise PreHookException('found files with !NO_COMMIT or !NO_TRACK')
 

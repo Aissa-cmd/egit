@@ -52,7 +52,11 @@ class Repository:
     def get_staged_file_diff(self, file: Path) -> str:
         file_path = str(file.as_posix())
         if file_path not in self.staged_files:
-            diff = get_staged_file_diff(self.repo, file)
+            diff = ""
+            if self.is_first_commit:
+                diff = file.read_text()
+            else:
+                diff = get_staged_file_diff(self.repo, file)
             self._staged_files_diff[file_path] = diff
             return diff
         return self._staged_files_diff[file_path]

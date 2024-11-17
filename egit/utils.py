@@ -6,6 +6,7 @@ from git import Repo, exc
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from egit.args_parsers import egit_parser
 from egit.console import Console
+from egit.version import __version__
 
 class ArgvOptions:
     def __init__(self, egit_args: argparse.Namespace, git_args: list[str]):
@@ -20,8 +21,8 @@ class ArgvOptions:
         """
     
 def print_help():
-    help_text = """
-    egit - Enhanced Git CLI (v0.1.0)
+    help_text = f"""
+    egit - Enhanced Git CLI (v{__version__})
     
     Usage:
         egit [options] -- [git commands/options]
@@ -51,6 +52,10 @@ def parse_argv(args: list[str]) -> ArgvOptions:
     # called with no args (egit and git) or with -h/--help, print help and exit
     if (len(egit_args) == 0 or parsed_options.egit_args.help) and (len(git_args) == 0):
         print_help()
+        sys.exit(0)
+    # called with -V/--version, print version and exit
+    if parsed_options.egit_args.version:
+        print(f"v{__version__}")
         sys.exit(0)
     return parsed_options
 
